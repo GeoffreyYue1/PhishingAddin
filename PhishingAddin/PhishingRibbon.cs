@@ -1,0 +1,52 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Microsoft.Office.Tools.Ribbon;
+using Microsoft.Office.Interop.Outlook;
+using System.Windows.Forms;
+
+namespace PhishingAddin
+{
+    public partial class PhishingRibbon
+    {
+        public const string MailTo = "geoffrey@geoffrey1.onmicrosoft.com";
+       
+        private void PhishingRibbon_Load(object sender, RibbonUIEventArgs e)
+        {
+
+        }
+
+        private void btn_Phishing_Click(object sender, RibbonControlEventArgs e)
+        {
+            Explorer explorer = Globals.ThisAddIn.Application.ActiveExplorer();
+            if (explorer != null && explorer.Selection != null && explorer.Selection.Count > 0)
+            {
+               
+
+                var item = explorer.Selection[1];
+
+                MailItem newMail = Globals.ThisAddIn.Application.CreateItem(OlItemType.olMailItem);
+                newMail.To = MailTo;
+                string subject = "Report Phishing " + item.Subject;
+                newMail.Subject = subject.Length>100?subject.Substring(0,100):subject;
+                newMail.Attachments.Add(explorer.Selection[1]);
+                newMail.Body = "This mail was submited as spam by end user, please analysis";
+                newMail.DeleteAfterSubmit = true;
+                newMail.Send();
+
+                item.Delete();
+
+                MessageBox.Show("The mail seems to be a phishing or spam, if you click any link please communicate with your manager or contact IT team", "Report Phishing", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            }
+            else
+            {
+                MessageBox.Show("Active Explorer is null");
+            }
+
+
+
+        }
+    }
+}
